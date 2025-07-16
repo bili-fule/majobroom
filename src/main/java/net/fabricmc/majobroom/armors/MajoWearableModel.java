@@ -19,23 +19,20 @@ public class MajoWearableModel extends BipedEntityModel<LivingEntity> {
     private final HashMap<String, GeomtryBean.BonesBean> bonesBean = new HashMap();
     public  String name ;
     public  ModelType type;
+
     public MajoWearableModel(ModelPart root, String name, ModelType type) {
         super(root, RenderLayer::getEntityTranslucent);
         this.base = getTexturedModelData(name).createModel();
         this.name = name;
         this.type = type;
     }
+
     public static enum ModelType{
         HEAD,UPPER_BODY,DOWN_BODY,FOOT
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-//        ImmutableList.of(this.base).forEach((modelRenderer) -> {
-//            modelRenderer.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-//
-//        });
-
+    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         switch (type){
             case HEAD:
                 this.base.copyTransform(this.head);
@@ -60,23 +57,16 @@ public class MajoWearableModel extends BipedEntityModel<LivingEntity> {
                 this.base.getChild("RightLeg").copyTransform(this.rightLeg);
         }
 
-        this.base.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        this.base.render(matrices, vertices, light, overlay, color);
     }
 
     public TexturedModelData getTexturedModelData(String path) {
         GeomtryBean model =  ModelJsonReader.readJson("jsonmodels/"+path);
 
-
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
-//        modelPartData.addChild("sdasdsads", ModelPartBuilder.create().uv(0, 0).cuboid(-6F, 12F, -6F, 24F, 24F, 24F), ModelTransform.pivot(0F, 100F, 5F));
-//
-//        var another_cube = ModelPartBuilder.create().uv(0, 0).cuboid(-6F, 12F, -6F, 12F, 12F, 12F);
-//        modelPartData.getChild("sdasdsads").addChild("aaa",another_cube,ModelTransform.pivot(0F, 1F, 1F));
-
 
         if (model != null) {
-
             for (GeomtryBean.BonesBean bone : model.getBones()) {
                 ModelPartBuilder newBone = ModelPartBuilder.create();
                 float x=0,y=0,z=0;
@@ -111,10 +101,7 @@ public class MajoWearableModel extends BipedEntityModel<LivingEntity> {
         return TexturedModelData.of(modelData, model.getTexturewidth(), model.getTextureheight());
     }
 
-
     private float convertOrigin(GeomtryBean.BonesBean bones, GeomtryBean.BonesBean.CubesBean cubes, int index) {
         return index == 1 ? (Float)bones.getPivot().get(index) - (Float)cubes.getOrigin().get(index) - (Float)cubes.getSize().get(index) : (Float)cubes.getOrigin().get(index) - (Float)bones.getPivot().get(index);
     }
-
-
 }

@@ -1,6 +1,5 @@
 package net.fabricmc.majobroom.mixin;
 
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.majobroom.client.render.feature.MajoClothFeatureRenderer;
@@ -36,6 +35,11 @@ public abstract class PlayerEntityRenderMixin<T extends LivingEntity, M extends 
 
     @Inject(at = @At("TAIL"), method = "<init>")
     private void init(EntityRendererFactory.Context ctx, boolean slim, CallbackInfo ci){
-        addFeature(new MajoClothFeatureRenderer((PlayerEntityRenderer)(Object)this, new BipedEntityModel(ctx.getPart(slim ? EntityModelLayers.PLAYER_SLIM_INNER_ARMOR : EntityModelLayers.PLAYER_INNER_ARMOR)), new BipedEntityModel(ctx.getPart(slim ? EntityModelLayers.PLAYER_SLIM_OUTER_ARMOR : EntityModelLayers.PLAYER_OUTER_ARMOR))));
+        addFeature(new MajoClothFeatureRenderer(
+                (PlayerEntityRenderer)(Object)this,
+                new BipedEntityModel(ctx.getPart(slim ? EntityModelLayers.PLAYER_SLIM_INNER_ARMOR : EntityModelLayers.PLAYER_INNER_ARMOR)),
+                new BipedEntityModel(ctx.getPart(slim ? EntityModelLayers.PLAYER_SLIM_OUTER_ARMOR : EntityModelLayers.PLAYER_OUTER_ARMOR)),
+                ctx.getModelManager()
+        ));
     }
 }

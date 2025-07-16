@@ -25,33 +25,24 @@ public class BroomModel extends EntityModel<BroomEntity> {
         this.base = getTexturedModelData().createModel();
     }
 
-
-
     @Override
     public void setAngles(BroomEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+    public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
         ImmutableList.of(this.base).forEach((modelRenderer) -> {
-            modelRenderer.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+            modelRenderer.render(matrices, vertices, light, overlay);
         });
     }
 
-    public  TexturedModelData getTexturedModelData() {
-        GeomtryBean model =  ModelJsonReader.readJson("jsonmodels/brooms/broom.json");
-
+    public TexturedModelData getTexturedModelData() {
+        GeomtryBean model = ModelJsonReader.readJson("jsonmodels/brooms/broom.json");
 
         ModelData modelData = new ModelData();
         ModelPartData modelPartData = modelData.getRoot();
-//        modelPartData.addChild("sdasdsads", ModelPartBuilder.create().uv(0, 0).cuboid(-6F, 12F, -6F, 24F, 24F, 24F), ModelTransform.pivot(0F, 100F, 5F));
-//
-//        var another_cube = ModelPartBuilder.create().uv(0, 0).cuboid(-6F, 12F, -6F, 12F, 12F, 12F);
-//        modelPartData.getChild("sdasdsads").addChild("aaa",another_cube,ModelTransform.pivot(0F, 1F, 1F));
-
 
         if (model != null) {
-
             for (BonesBean bone : model.getBones()) {
                 ModelPartBuilder newBone = ModelPartBuilder.create();
                 float x=0,y=0,z=0;
@@ -86,10 +77,7 @@ public class BroomModel extends EntityModel<BroomEntity> {
         return TexturedModelData.of(modelData, model.getTexturewidth(), model.getTextureheight());
     }
 
-
     private float convertOrigin(GeomtryBean.BonesBean bones, GeomtryBean.BonesBean.CubesBean cubes, int index) {
         return index == 1 ? (Float)bones.getPivot().get(index) - (Float)cubes.getOrigin().get(index) - (Float)cubes.getSize().get(index) : (Float)cubes.getOrigin().get(index) - (Float)bones.getPivot().get(index);
     }
-
 }
-

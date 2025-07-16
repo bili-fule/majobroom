@@ -32,13 +32,13 @@ public class BroomEntityRenderer extends EntityRenderer<BroomEntity> {
         matrices.translate(0,floating_value,0);
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(p));
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90-y));
-        broomModel.render(matrices,vertexConsumer,light, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
+        broomModel.render(matrices,vertexConsumer,light, OverlayTexture.DEFAULT_UV);
         matrices.pop();
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
     }
 
-    private final Identifier broomTexture = new Identifier("majobroom", "textures/entity/broom.png");
-    private final Identifier broomTextureTransparent = new Identifier("majobroom", "textures/entity/broom_transparent.png");
+    private final Identifier broomTexture = Identifier.of("majobroom", "textures/entity/broom.png");
+    private final Identifier broomTextureTransparent = Identifier.of("majobroom", "textures/entity/broom_transparent.png");
     @Override
     public Identifier getTexture(BroomEntity entity) {
         if(entity.hasPassengers() && entity.getFirstPassenger().getId()== MinecraftClient.getInstance().player.getId()){

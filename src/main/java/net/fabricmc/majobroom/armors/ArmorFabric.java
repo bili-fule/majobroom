@@ -1,54 +1,63 @@
 package net.fabricmc.majobroom.armors;
 
-import net.minecraft.entity.EquipmentSlot;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
+import net.minecraft.item.Items;
 
-public class ArmorFabric implements ArmorMaterial {
-    public static final int[] BASE_DURABILITY = new int[]{20,30,25,15};//定义护甲的耐久，此处数据按照从头到脚的顺序
-    public static final int[] BASE_PROTECTION_AMOUNT = new int[]{2,5,6,3};//定义护甲的保护值，顺序同上
+public class ArmorFabric {
+    public static final int DURABILITY_MULTIPLIER = 25;
 
-    @Override
-    public int getDurability(EquipmentSlot arg0) {
-        return BASE_DURABILITY[arg0.getEntitySlotId()]*25;
+    public static final RegistryEntry<ArmorMaterial> MAJOWEARABLE = registerMaterial("majowearable",
+            // 防护值映射 - 按照头盔、胸甲、护腿、靴子的顺序
+            Map.of(
+                    ArmorItem.Type.HELMET, 2,
+                    ArmorItem.Type.CHESTPLATE, 6,
+                    ArmorItem.Type.LEGGINGS, 5,
+                    ArmorItem.Type.BOOTS, 3
+            ),
+            // 附魔等级
+            100,
+            // 装备声音
+            SoundEvents.ITEM_ARMOR_EQUIP_LEATHER,
+            // 修复材料
+            () -> Ingredient.ofItems(Items.PURPLE_WOOL),
+            // 韧性
+            10.0F,
+            // 击退抗性
+            0.0F,
+            // 是否可染色
+            false);
+
+    public static RegistryEntry<ArmorMaterial> registerMaterial(String id, Map<ArmorItem.Type, Integer> defensePoints,
+                                                                int enchantability, RegistryEntry<SoundEvent> equipSound, Supplier<Ingredient> repairIngredientSupplier,
+                                                                float toughness, float knockbackResistance, boolean dyeable) {
+
+        // 创建装备层
+        List<ArmorMaterial.Layer> layers = List.of(
+                new ArmorMaterial.Layer(Identifier.of("majobroom", id), "", dyeable)
+        );
+
+        ArmorMaterial material = new ArmorMaterial(defensePoints, enchantability, equipSound,
+                repairIngredientSupplier, layers, toughness, knockbackResistance);
+
+        // 注册材料
+        material = Registry.register(Registries.ARMOR_MATERIAL, Identifier.of("majobroom", id), material);
+
+        return RegistryEntry.of(material);
     }
 
-    @Override
-    public int getProtectionAmount(EquipmentSlot arg0) {
-        return BASE_PROTECTION_AMOUNT[arg0.getEntitySlotId()];
-    }
-
-    @Override
-    public int getEnchantability() {
-        return 100;//设置附魔等级
-    }
-
-    @Override
-    public SoundEvent getEquipSound() {
-        return SoundEvents.ITEM_ARMOR_EQUIP_LEATHER;//设置使用时的声音，可选
-    }
-
-    @Override
-    public Ingredient getRepairIngredient() {
-        return Ingredient.ofItems(Items.PURPLE_WOOL);//设置使用铁砧修复的配方，可选
-    }
-
-    @Override
-    public String getName() {
-        return "majowearable";//设置名称，后期添加材质需要使用
-    }
-
-    @Override
-    public float getToughness() {
-        return 10;//设置武器韧性
-    }
-
-    @Override
-    public float getKnockbackResistance() {
-        return 0;
+    public static void initialize() {
+        // 初始化方法，确保类被加载
     }
 }

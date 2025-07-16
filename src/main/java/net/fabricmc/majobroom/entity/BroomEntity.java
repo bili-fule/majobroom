@@ -65,21 +65,17 @@ public class BroomEntity extends BoatEntity {
 
     @Override
     protected boolean canAddPassenger(Entity passenger) {
-
         return this.getPassengerList().size() < 1;
     }
 
-    @Override
-    public void updatePassengerPosition(Entity passenger) {
-        super.updatePassengerPosition(passenger);
-        passenger.setPosition(passenger.getX(),passenger.getY()+0.6 +floatingValue,passenger.getZ());
-    }
+    // 修复1: 移除@Override，因为updatePassengerPosition现在是final方法
+    
 
     @Environment(EnvType.CLIENT)
     private void clientTick(){
-
         if (passenger != null){
-            if ((!this.hasPassengers()) && this.world.isClient && MinecraftClient.getInstance().player.getId() == passenger.getId()){
+            // 修复2: 使用getWorld()替代直接访问world字段
+            if ((!this.hasPassengers()) && this.getWorld().isClient && MinecraftClient.getInstance().player.getId() == passenger.getId()){
                 if(MajoBroomConfig.getInstance().autoThirdPersonView) {
                     MinecraftClient.getInstance().options.setPerspective(Perspective.FIRST_PERSON);
                 }
@@ -109,18 +105,14 @@ public class BroomEntity extends BoatEntity {
             passenger.setYaw(MathHelper.wrapDegrees(this.getYaw() + 90));
             passenger.setHeadYaw(MathHelper.wrapDegrees(this.getYaw() + 90));
         }
-
     }
 
     @Override
     public void tick() {
-
         autoFall();
 
-
-
-
-        if (this.world.isClient()){
+        // 修复3: 使用getWorld()替代直接访问world字段
+        if (this.getWorld().isClient()){
             clientTick();
             updateKeys();
             if(this.hasPassengers() && MinecraftClient.getInstance().player.getId() == this.getFirstPassenger().getId()){
@@ -131,13 +123,14 @@ public class BroomEntity extends BoatEntity {
                 var rotation_v = this.getRotationVector();
                 rotation_v = new Vec3d(-rotation_v.z,rotation_v.y,rotation_v.x);
                 float target_v = 0;
-//                if (passenger != null && ((PlayerEntity)passenger).getEquippedStack(EquipmentSlot.HEAD).getItem() instanceof BaseArmor){
-                if (passenger != null && StreamSupport.stream(((PlayerEntity)passenger).getItemsEquipped().spliterator(), false)
-                        .anyMatch(itemStack -> itemStack.getItem() instanceof  BaseArmor)){
+
+                // 修复4: 使用getEquippedStack替代getItemsEquipped
+                if (passenger != null && ((PlayerEntity)passenger).getEquippedStack(EquipmentSlot.HEAD).getItem() instanceof BaseArmor){
                     maxspeed = 0.6f;
                 }else {
                     maxspeed = 0.3f;
                 }
+
                 if (forward) {
                     target_v = maxspeed;
                 } else if (back) {
@@ -180,6 +173,17 @@ public class BroomEntity extends BoatEntity {
         }
         updateFloatingValue();
 
+        // 手动更新乘客位置
+        if (this.hasPassengers()) {
+            Entity passenger = this.getFirstPassenger();
+            if (passenger != null) {
+                passenger.setPosition(
+                    passenger.getX(),
+                    passenger.getY() + 0.6 + floatingValue,
+                    passenger.getZ()
+                );
+            }
+        }
     }
 
     private int smoothcd = 0;
@@ -204,9 +208,9 @@ public class BroomEntity extends BoatEntity {
 
     private double smoothX,smoothY,smoothZ;float smoothYaw,smoothPitch;
 
-    @Override
-    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate) {
-        super.updateTrackedPositionAndAngles(x, y, z, yaw, pitch, interpolationSteps, interpolate);
+    // 修复5: 移除@Override和boolean参数
+    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
+        super.updateTrackedPositionAndAngles(x, y, z, yaw, pitch, interpolationSteps);
         this.smoothX = x;
         this.smoothY = y;
         this.smoothZ = z;
@@ -214,8 +218,6 @@ public class BroomEntity extends BoatEntity {
         this.smoothPitch = pitch;
         this.smoothcd=10;
     }
-
-
 
     @Override
     protected void refreshPosition() {
@@ -230,24 +232,21 @@ public class BroomEntity extends BoatEntity {
         right = MinecraftClient.getInstance().options.rightKey.isPressed();
         up = MinecraftClient.getInstance().options.jumpKey.isPressed();
         down = MinecraftClient.getInstance().options.sprintKey.isPressed();
-
     }
 
     @Override
     public ActionResult interact(PlayerEntity player, Hand hand) {
         if (player.shouldCancelInteraction()) {
-
             return ActionResult.PASS;
         } else {
-            if (!this.world.isClient) {
+            // 修复6: 使用getWorld()替代直接访问world字段
+            if (!this.getWorld().isClient) {
                 return player.startRiding(this) ? ActionResult.CONSUME : ActionResult.PASS;
             } else {
-
                 return ActionResult.SUCCESS;
             }
         }
     }
-
 
     @Override
     public boolean damage(DamageSource source, float amount) {
@@ -282,6 +281,4 @@ public class BroomEntity extends BoatEntity {
             this.move(MovementType.SELF,this.getVelocity());
         }
     }
-
-
 }
